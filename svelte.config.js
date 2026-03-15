@@ -4,11 +4,6 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 export default {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter({
-      routes: {
-        include: ['/*'],
-        exclude: ['<all>']
-      }
-    })
+    adapter: adapter()
   }
 };
