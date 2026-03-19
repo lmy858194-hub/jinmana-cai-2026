@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
 
   let chain = $state('ETH');
-  let tokenAddress = $state('0xdac17f958d2ee523a2206206994597c13d831ec7');
-  let scanKey = $state('EXQI6PQQZFK1XTJN8P9GPSUWIN2DMD3R7A');
+  let tokenAddress = $state('0xdac17f958d2ee523a2206206994597c13d831ec7'); // 默认 ETH USDT
+  let scanKey = $state('EXQI6PQQZFK1XTJN8P9GPSUWIN2DMD3R7A'); // 你的 Key 已硬编码
   let holders: any[] = $state([]);
   let riskWarning = $state('');
   let honeypot: any = $state(null);
@@ -17,13 +17,16 @@
   };
 
   async function loadAll() {
-    loading = true; error = '';
+    loading = true;
+    error = '';
     try {
       await loadEVM();
       await Promise.all([fetchDex(), scanSecurity()]);
     } catch (e) {
       error = `国际标准错误：${(e as Error).message}`;
-    } finally { loading = false; }
+    } finally {
+      loading = false;
+    }
   }
 
   async function loadEVM() {
@@ -42,22 +45,24 @@
 
     if (hData.status !== "1") {
       if (hData.result?.includes("Free API access is not supported")) {
-        error = `🚨 ${chain}免费额度已用尽！请升级Etherscan Pro`;
+        error = `🚨 ${chain}免费额度已用尽！请升级 Etherscan Pro`;
         return;
       }
-      throw new Error(hData.message);
+      throw new Error(hData.message || '数据加载失败');
     }
 
     const decimals = dData.status === "1" && dData.result?.[0] ? parseInt(dData.result[0].tokenDecimal) : 18;
-    const supply = parseFloat(sData.result) / Math.pow(10, decimals);
+    const supply = parseFloat(sData.result || '1') / Math.pow(10, decimals);
 
     holders = (hData.result || []).map((h: any) => {
-      const qty = parseFloat(h.TokenHolderQuantity) / Math.pow(10, decimals);
+      const qty = parseFloat(h.TokenHolderQuantity || '0') / Math.pow(10, decimals);
       return { ...h, pct: (qty / supply * 100).toFixed(2) };
     });
 
-    const top10 = holders.slice(0,10).reduce((sum, h) => sum + parseFloat(h.pct), 0);
-    riskWarning = top10 > 60 ? `🚨 前10持仓 ${top10.toFixed(1)}% —— 国际貔貅警报！` : `✅ 持仓健康（前10 ${top10.toFixed(1)}%）`;
+    const top10 = holders.slice(0, 10).reduce((sum, h) => sum + parseFloat(h.pct), 0);
+    riskWarning = top10 > 60 
+      ? `🚨 前10持仓 ${top10.toFixed(1)}% —— 国际貔貅警报！` 
+      : `✅ 持仓健康（前10 ${top10.toFixed(1)}%）`;
   }
 
   async function fetchDex() {
@@ -85,7 +90,7 @@
 <div class="min-h-screen bg-zinc-950 text-white p-6">
   <header class="text-center mb-8">
     <h1 class="text-4xl font-bold text-cyan-400">金马纳财 2026</h1>
-    <p class="text-xs text-zinc-400">国际DeFi风控标准 • 多链 • PWA</p>
+    <p class="text-xs text-zinc-400">国际DeFi风控标准 • 多链 • PWA • 真实链上数据</p>
   </header>
 
   <div class="max-w-2xl mx-auto">
@@ -101,10 +106,16 @@
     {#if error}<div class="mt-4 p-4 bg-red-950 text-red-400 rounded-2xl">{error}</div>{/if}
     {#if riskWarning}<div class="mt-4 p-4 bg-yellow-950 text-yellow-400 rounded-2xl font-bold">{riskWarning}</div>{/if}
 
-    {#if holders.length}
+    {#if holders && holders.length}
       <div class="mt-8 overflow-auto">
-        <table class="w-full border-collapse"><tr class="bg-zinc-800"><th class="p-3">地址</th><th class="p-3">占比</th></tr>
-          {#each holders as h}<tr class="border-t border-zinc-700"><td class="p-3 font-mono text-xs">{h.TokenHolderAddress.slice(0,12)}...</td><td class="p-3">{h.pct}%</td></tr>{/each}
+        <table class="w-full border-collapse">
+          <tr class="bg-zinc-800"><th class="p-3">地址</th><th class="p-3">占比</th></tr>
+          {#each (holders || []) as h}
+            <tr class="border-t border-zinc-700">
+              <td class="p-3 font-mono text-xs">{h.TokenHolderAddress.slice(0,12)}...</td>
+              <td class="p-3">{h.pct}%</td>
+            </tr>
+          {/each}
         </table>
       </div>
     {/if}
