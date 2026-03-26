@@ -17,7 +17,8 @@
   };
 
   async function loadAll() {
-    loading = true; error = '';
+    loading = true;
+    error = '';
     try {
       await loadEVM();
       await Promise.all([fetchDex(), scanSecurity()]);
@@ -79,7 +80,7 @@
     };
   }
 
-  onMount(() => loadAll());
+  // 去掉自动加载，只保留手动按钮
 </script>
 
 <div class="min-h-screen bg-zinc-950 text-white p-6">
