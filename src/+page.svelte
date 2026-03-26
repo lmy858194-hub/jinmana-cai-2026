@@ -17,7 +17,8 @@
   };
 
   async function loadAll() {
-    loading = true; error = '';
+    loading = true;
+    error = '';
     try {
       await loadEVM();
       await Promise.all([fetchDex(), scanSecurity()]);
@@ -31,9 +32,9 @@
     const base = `${c.base}?chainid=${c.cid}&apikey=${scanKey}`;
 
     const [hRes, sRes, decRes] = await Promise.all([
-      fetch(`/api/proxy?target=${encodeURIComponent(`${base}&module=token&action=tokenholderlist&contractaddress=${tokenAddress}&page=1&offset=100`)}`),
-      fetch(`/api/proxy?target=${encodeURIComponent(`${base}&module=token&action=tokensupply&contractaddress=${tokenAddress}`)}`),
-      fetch(`/api/proxy?target=${encodeURIComponent(`${base}&module=token&action=tokeninfo&contractaddress=${tokenAddress}`)}`)
+      fetch(`${base}&module=token&action=tokenholderlist&contractaddress=${tokenAddress}&page=1&offset=100`),
+      fetch(`${base}&module=token&action=tokensupply&contractaddress=${tokenAddress}`),
+      fetch(`${base}&module=token&action=tokeninfo&contractaddress=${tokenAddress}`)
     ]);
 
     const hData = await hRes.json();
@@ -61,7 +62,7 @@
   }
 
   async function fetchDex() {
-    const res = await fetch(`/api/proxy?target=${encodeURIComponent(`https://api.dexscreener.com/latest/dex/search?q=${tokenAddress}`)}`);
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${tokenAddress}`);
     const data = await res.json();
     const pair = data.pairs?.[0];
     dexUrl = pair ? `https://dexscreener.com/${pair.chainId}/${pair.pairAddress}` : '';
@@ -69,7 +70,7 @@
 
   async function scanSecurity() {
     const cid = CONFIG[chain].cid;
-    const res = await fetch(`/api/proxy?target=${encodeURIComponent(`https://api.gopluslabs.io/api/v1/token/security/${cid}/${tokenAddress}`)}`);
+    const res = await fetch(`https://api.gopluslabs.io/api/v1/token/security/${cid}/${tokenAddress}`);
     const d = await res.json();
     const r = d[tokenAddress.toLowerCase()] || {};
     honeypot = {
