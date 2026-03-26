@@ -17,8 +17,7 @@
   };
 
   async function loadAll() {
-    loading = true;
-    error = '';
+    loading = true; error = '';
     try {
       await loadEVM();
       await Promise.all([fetchDex(), scanSecurity()]);
