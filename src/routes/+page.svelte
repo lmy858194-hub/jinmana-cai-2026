@@ -103,8 +103,21 @@
 
     {#if holders.length}
       <div class="mt-8 overflow-auto">
-        <table class="w-full border-collapse"><tr class="bg-zinc-800"><th class="p-3">地址</th><th class="p-3">占比</th></tr>
-          {#each holders as h}<tr class="border-t border-zinc-700"><td class="p-3 font-mono text-xs">{h.TokenHolderAddress.slice(0,12)}...</td><td class="p-3">{h.pct}%</td></tr>{/each}
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-zinc-800">
+              <th class="p-3">地址</th>
+              <th class="p-3">占比</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each holders as h}
+              <tr class="border-t border-zinc-700">
+                <td class="p-3 font-mono text-xs">{h.TokenHolderAddress.slice(0,12)}...</td>
+                <td class="p-3">{h.pct}%</td>
+              </tr>
+            {/each}
+          </tbody>
         </table>
       </div>
     {/if}
